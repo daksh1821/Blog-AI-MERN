@@ -1,0 +1,22 @@
+export const blogCategories = [
+    { value: "Startup", label: "Startup" },
+    { value: "Technology", label: "Technology" },
+    { value: "Business", label: "Business" },
+    { value: "Marketing", label: "Marketing" },
+    { value: "Health", label: "Health" },
+    { value: "Lifestyle", label: "Lifestyle" },
+    { value: "Education", label: "Education" },
+    { value: "Finance", label: "Finance" },
+    { value: "Travel", label: "Travel" },
+    { value: "Food", label: "Food" },
+    { value: "Entertainment", label: "Entertainment" },
+    { value: "Productivity", label: "Productivity" },
+    { value: "Personal Development", label: "Personal Development" },
+    { value: "AI & Machine Learning", label: "AI & Machine Learning" },
+    { value: "Web Development", label: "Web Development" },
+    { value: "Mobile Apps", label: "Mobile Apps" },
+    { value: "Design & UX", label: "Design & UX" },
+    { value: "Science", label: "Science" },
+    { value: "Environment", label: "Environment" },
+    { value: "Other", label: "Other" }
+  ];
