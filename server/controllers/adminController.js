@@ -12,3 +12,4 @@ export const adminLogin = async (req,res)=>{
         res.json({success:false,messege:error.messege})
     }
 }
+
