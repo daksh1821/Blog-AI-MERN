@@ -1,14 +1,29 @@
 import React, { useState } from 'react'
+import { useAppContext } from '../../context/AppContext';
+import toast from 'react-hot-toast';
 
 export default function Login() {
+
+  const{axios,setToken} = useAppContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Email:", email);
-    console.log("Password:", password);
-    // You can add your login API logic here
+    try {
+      const {data} = await axios.post('/api/admin/login',{email,password});
+      if(data.success){
+        setToken(data.token);
+        localStorage.setItem('token',data.token);
+        axios.defaults.headers.common['Authorization'] = `${data.token}`;
+        window.location.reload();
+      }
+      else{
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   return (

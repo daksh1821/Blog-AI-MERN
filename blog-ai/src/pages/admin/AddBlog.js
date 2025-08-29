@@ -1,8 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Quill from 'quill';
-import {blogCategories} from '../../data/blogCategories';
+import { blogCategories } from '../../data/blogCategories';
+import { useAppContext } from '../../context/AppContext';
+import toast from 'react-hot-toast';
 
 export default function AddBlog() {
+  const { axios } = useAppContext();
+  const [isAdding, setIsAdding] = useState(false);
   const editorRef = useRef(null);
   const quillRef = useRef(null);
   const [image, setImage] = useState(null);
@@ -12,35 +16,67 @@ export default function AddBlog() {
   const [isPublished, setIsPublished] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    console.log({
-      image,
-      title,
-      subTitle,
-      category,
-      isPublished,
-      description: quillRef.current?.root.innerHTML
-    })
-  }
+    e.preventDefault();
+
+    // ✅ Frontend validation
+    if (!title || !subTitle || !image || !quillRef.current.root.innerHTML.trim()) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      setIsAdding(true);
+
+      const blog = {
+        title,
+        subTitle,
+        description: quillRef.current.root.innerHTML,
+        category,
+        isPublished
+      };
+
+      const formData = new FormData();
+      formData.append('blog', JSON.stringify(blog));
+      formData.append('image', image);
+
+      const { data } = await axios.post('/api/blog/add', formData);
+
+      if (data.success) {
+        toast.success("Blog added successfully!");
+        setTitle('');
+        setSubTitle('');
+        setImage(null);
+        quillRef.current.root.innerHTML = "";
+        setCategory("Startup");
+        setIsPublished(false);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   const generateContent = async () => {
-    console.log("Generating content with AI...")
-  }
+    console.log("Generating content with AI...");
+  };
 
-  useEffect(()=>{
-    if(!quillRef.current && editorRef.current){
+  useEffect(() => {
+    if (!quillRef.current && editorRef.current) {
       quillRef.current = new Quill(editorRef.current, {
         theme: 'snow',
         modules: {
           toolbar: [
             ['bold', 'italic', 'underline'],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ list: 'ordered' }, { list: 'bullet' }],
             ['link', 'image']
           ]
         }
       });
     }
-  }, [])
+  }, []);
 
   return (
     <form
@@ -100,13 +136,21 @@ export default function AddBlog() {
             Generate with AI
           </button>
         </div>
+
+        {/* Category */}
         <p className='mt-4'>Blog category</p>
-        <select onChange={e=> setCategory(e.target.value)} name="category" className='mt-2 px-3 py-2 border text-gray-500 border-gray-300 outline-none rounded'>
+        <select 
+          onChange={e=> setCategory(e.target.value)} 
+          value={category}
+          className='mt-2 px-3 py-2 border text-gray-500 border-gray-300 outline-none rounded'
+        >
           <option value="">Select Category</option>
-          {blogCategories.map((item,index)=>{
-            return <option key={index} value={item.value}>{item.label}</option>
-          })}
+          {blogCategories.map((item,index)=>(
+            <option key={index} value={item.value}>{item.label}</option>
+          ))}
         </select>
+
+        {/* Publish Toggle */}
         <div className='flex gap-2 mt-4'>
           <label className='flex items-center gap-2 mt-4'>
             <input 
@@ -118,8 +162,16 @@ export default function AddBlog() {
             <span>Publish</span>
           </label>
         </div>
-        <button type="submit" className='mt-8 w-40 h-10 bg-primary text-white rounded cursor-pointer text-sm'>Add Blog</button>
+
+        {/* Submit Button */}
+        <button 
+          disabled={isAdding} 
+          type="submit" 
+          className='mt-8 w-40 h-10 bg-primary text-white rounded cursor-pointer text-sm'
+        >
+          {isAdding ? 'Adding...' : 'Add Blog'}
+        </button>
       </div>
     </form>
-  )
+  );
 }
