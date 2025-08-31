@@ -1,52 +1,31 @@
 import React, { useState } from 'react'
 import { useEffect } from 'react';
 import BlogTableItem from '../../components/admin/BlogTableItem';
+import { useAppContext } from '../../context/AppContext';
+import toast from 'react-hot-toast';
 
 export default function Dashboard() {
 
   // Random dashboard mock data
-const dashboard_data = {
-  blogs: 12,
-  comments: 58,
-  drafts: 4,
-  recentblogs: [
-    {
-      id: 1,
-      title: "The Future of AI in Blogging",
-      createdAt: "2025-08-10",
-      views: 320,
-    },
-    {
-      id: 2,
-      title: "Top 10 Tips for Writing Engaging Content",
-      createdAt: "2025-08-05",
-      views: 210,
-    },
-    {
-      id: 3,
-      title: "How to Optimize Blogs for SEO in 2025",
-      createdAt: "2025-07-28",
-      views: 415,
-    },
-    {
-      id: 4,
-      title: "Why Personal Branding Matters for Bloggers",
-      createdAt: "2025-07-20",
-      views: 180,
-    },
-  ],
-};
 
-  const[dashboardData,setDashboardData] = useState({
+
+const {axios} = useAppContext();
+
+  const[dashboardData, setDashboardData] = useState({
     blogs:0,
-    comments:0,
+    comment:0,
     drafts:0,
-    recentblogs:[]
+    recentBlogs:[]
   })
 
   // Simulating fetching data
   const fetchDashboard = async ()=>{
-    setDashboardData(dashboard_data)
+    try {
+      const {data} = await axios.get('/api/admin/dashboard')
+      data.success ? setDashboardData(data.dashboardData): toast.error(data.message);
+    } catch (error) {
+        toast.error(error.message);
+    }
   }
   useEffect(()=>{
     fetchDashboard();
@@ -65,7 +44,7 @@ const dashboard_data = {
         <div className='flex items-center gap-4 bg-white p-4 min-w-58 rounded shadow cursor-pointer hove:scale-105 transition-all'>
           <img className='w-12' src="commentsicon.png" alt="" />
           <div>
-            <p className='text-xl font-semibold text-gray-600'>{dashboardData.comments}</p>
+            <p className='text-xl font-semibold text-gray-600'>{dashboardData.comment}</p>
             <p className='text-gray-400 font-light'>Comments</p>
           </div>
         </div>
@@ -96,7 +75,7 @@ const dashboard_data = {
               </tr>
             </thead>
             <tbody>
-              {dashboardData.recentblogs.map((blog,index)=>{
+              {dashboardData.recentBlogs.map((blog,index)=>{
                 return <BlogTableItem key={blog._id} blog={blog} fetchBlogs={fetchDashboard} index={index +1}/>
               })}
             </tbody>
