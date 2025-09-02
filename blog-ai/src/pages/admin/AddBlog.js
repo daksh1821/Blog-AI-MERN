@@ -3,10 +3,12 @@ import Quill from 'quill';
 import { blogCategories } from '../../data/blogCategories';
 import { useAppContext } from '../../context/AppContext';
 import toast from 'react-hot-toast';
+import {parse} from 'marked';
 
 export default function AddBlog() {
   const { axios } = useAppContext();
   const [isAdding, setIsAdding] = useState(false);
+  const [loading,setLoading] = useState(false);
   const editorRef = useRef(null);
   const quillRef = useRef(null);
   const [image, setImage] = useState(null);
@@ -60,7 +62,23 @@ export default function AddBlog() {
   };
 
   const generateContent = async () => {
-    console.log("Generating content with AI...");
+    if(!title){
+      toast.error("Please enter title first");
+    }
+      try {
+        setLoading(true);
+        const {data} = await axios.post('/api/blog/generate',{prompt:title});
+        if(data.success){
+          quillRef.current.root.innerHTML = parse(data.content);
+        } else {
+          toast.error(data.message);
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+      finally{
+        setLoading(false);
+      }
   };
 
   useEffect(() => {
@@ -129,6 +147,7 @@ export default function AddBlog() {
         <div className="relative border border-gray-300 rounded mt-2">
           <div ref={editorRef} className="min-h-[150px] p-2"></div>
           <button 
+            disabled={loading}
             type="button"
             onClick={generateContent}
             className="absolute bottom-2 right-2 text-xs text-white bg-black/70 px-4 py-1.5 rounded hover:underline cursor-pointer"
