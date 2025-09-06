@@ -81,6 +81,7 @@ export default function AddBlog() {
       }
   };
 
+
   useEffect(() => {
     if (!quillRef.current && editorRef.current) {
       quillRef.current = new Quill(editorRef.current, {
