@@ -80,7 +80,7 @@ export default function AddBlog() {
         setLoading(false);
       }
   };
-
+  
 
   useEffect(() => {
     if (!quillRef.current && editorRef.current) {
